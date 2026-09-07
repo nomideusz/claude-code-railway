@@ -1,0 +1,8 @@
+
+  Claude Code cloud box
+  ---------------------
+  claude        start Claude Code (first run: /login, or set CLAUDE_CODE_OAUTH_TOKEN / ANTHROPIC_API_KEY)
+  cl            same, inside a detachable tmux session (tmux attach -t claude to resume)
+  gh auth login GitHub CLI
+  ~/            persisted on the volume (repos, auth, dotfiles survive redeploys)
+
