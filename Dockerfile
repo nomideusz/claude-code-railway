@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive LANG=C.UTF-8 PORT=7681
 
 # Base toolbox: shell tools, ssh server, ttyd web terminal, build deps.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      ca-certificates curl wget gnupg git openssh-server ttyd tmux \
+      ca-certificates curl wget gnupg git openssh-server ttyd nginx-light tmux \
       vim nano less htop ripgrep jq unzip zip tree procps sudo locales \
       python3 python3-pip python3-venv build-essential \
       iputils-ping dnsutils net-tools \

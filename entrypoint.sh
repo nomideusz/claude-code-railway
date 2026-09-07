@@ -33,8 +33,26 @@ CFG
 # Make service variables visible to SSH sessions too (sshd strips the environment).
 env | grep -E '^(ANTHROPIC_|CLAUDE_|GH_TOKEN|GITHUB_TOKEN|TZ|PORT)' | sed 's/^/export /; s/=/="/; s/$/"/' > /etc/profile.d/railway-env.sh || true
 
+# nginx on $PORT: unauthenticated /healthcheck for Railway, everything else to ttyd.
+cat > /etc/nginx/sites-enabled/default <<CFG
+server {
+  listen ${PORT} default_server;
+  listen [::]:${PORT} default_server;
+  location = /healthcheck { return 200 "ok"; }
+  location / {
+    proxy_pass http://127.0.0.1:7682;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade \$http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host \$host;
+    proxy_read_timeout 1d;
+  }
+}
+CFG
+nginx
+
 echo "== claude-box ready: web terminal on :${PORT}, sshd on :22, claude $(claude --version 2>/dev/null)"
 # Web terminal: ttyd with basic auth, each tab attaches to the same tmux session.
-exec ttyd -p "${PORT}" -W -c "${WEB_USER:-admin}:${WEB_PASSWORD:?WEB_PASSWORD is required}" \
+exec ttyd -i 127.0.0.1 -p 7682 -W -c "${WEB_USER:-admin}:${WEB_PASSWORD:?WEB_PASSWORD is required}" \
   -t titleFixed="claude-box" -t fontSize=14 \
   bash -lc 'exec tmux new -A -s main'
