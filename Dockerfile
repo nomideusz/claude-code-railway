@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Skeleton for the persistent home (the volume mounts empty at /root on first boot).
 COPY skel/ /opt/skel/
 COPY entrypoint.sh /entrypoint.sh
+COPY drop-file-cache /usr/local/bin/drop-file-cache
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 22 7681

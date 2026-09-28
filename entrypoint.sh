@@ -51,6 +51,11 @@ server {
 CFG
 nginx
 
+# Railway counts the kernel's cache of files this container has touched as the
+# service's memory, and with no memory pressure it is never freed: one npm
+# install shows as hundreds of MB. Drop it for the home volume every 15 min.
+( while sleep 900; do nice -n 19 drop-file-cache /root /tmp || true; done ) &
+
 echo "== claude-box ready: web terminal on :${PORT}, sshd on :22, claude $(claude --version 2>/dev/null)"
 # Web terminal: ttyd with basic auth, each tab attaches to the same tmux session.
 exec ttyd -i 127.0.0.1 -p 7682 -W -c "${WEB_USER:-admin}:${WEB_PASSWORD:?WEB_PASSWORD is required}" \
