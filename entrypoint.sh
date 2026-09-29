@@ -7,6 +7,8 @@ set -e
 if [ ! -f /root/.claude-box-seeded ]; then
   cp -af /opt/skel/. /root/ && touch /root/.claude-box-seeded
 fi
+# Volumes seeded before .profile was in skel: login shells (SSH, tmux) never read ~/.bashrc.
+[ -f /root/.profile ] || cp /opt/skel/.profile /root/
 mkdir -p /root/.ssh /root/src && chmod 700 /root/.ssh
 
 # Persist SSH host keys on the volume so clients don't see "host key changed" after redeploys.

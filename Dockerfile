@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && npm install -g @anthropic-ai/claude-code \
   && curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR=/usr/local/bin sh \
   && mkdir -p /run/sshd \
+  && sed -i 's/^worker_processes .*/worker_processes 2;/' /etc/nginx/nginx.conf \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Skeleton for the persistent home (the volume mounts empty at /root on first boot).
