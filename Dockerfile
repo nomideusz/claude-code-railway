@@ -1,7 +1,7 @@
 FROM ubuntu:24.04
 
 # upgrade: npm @anthropic-ai/claude-code
-ARG CLAUDE_CODE_VERSION=2.1.314
+ARG CLAUDE_CODE_VERSION=2.1.317
 
 ENV DEBIAN_FRONTEND=noninteractive LANG=C.UTF-8 PORT=7681
 
