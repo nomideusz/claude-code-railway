@@ -35,6 +35,18 @@ CFG
 # Make service variables visible to SSH sessions too (sshd strips the environment).
 env | grep -E '^(ANTHROPIC_|CLAUDE_|GH_TOKEN|GITHUB_TOKEN|TZ|PORT)' | sed 's/^/export /; s/=/="/; s/$/"/' > /etc/profile.d/railway-env.sh || true
 
+# Small plans (Free 0.5 GB, Trial 1 GB) cap the whole service's memory. A busy
+# claude session grows past that and the kernel OOM-kills it, which Railway counts
+# as a failed deploy. Cap Node's heap at 60% of the limit there, so V8 collects
+# garbage harder instead. Services over 2 GB, or with NODE_OPTIONS set, keep the default.
+mem=$(cat /sys/fs/cgroup/memory.max 2>/dev/null || cat /sys/fs/cgroup/memory/memory.limit_in_bytes 2>/dev/null || echo max)
+if [ -z "${NODE_OPTIONS:-}" ] && [ "$mem" != max ] && [ "$mem" -le $((2 * 1024 * 1024 * 1024)) ] 2>/dev/null; then
+  heap=$((mem * 6 / 10 / 1024 / 1024))
+  echo "export NODE_OPTIONS=\"--max-old-space-size=${heap}\"" >> /etc/profile.d/railway-env.sh
+  export NODE_OPTIONS="--max-old-space-size=${heap}"
+  echo "== memory limit $((mem / 1024 / 1024)) MB: capping Node's heap at ${heap} MB"
+fi
+
 # nginx on $PORT: unauthenticated /healthcheck for Railway, everything else to ttyd.
 cat > /etc/nginx/sites-enabled/default <<CFG
 server {
